@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Owebia. All rights reserved.
+ * Copyright © 2016-2017 Owebia. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -10,7 +10,7 @@ class Config extends \Owebia\AdvancedSettingCore\Block\System\Config\Form\Field\
 {
     protected function getFullscreenTitle(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
-        return __("Advanced Shipping Setting Configuration");
+        return __("Advanced Shipping Configuration");
     }
 
     protected function getHelpUrl(\Magento\Framework\Data\Form\Element\AbstractElement $element)

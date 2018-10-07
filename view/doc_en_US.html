@@ -2,12 +2,14 @@
 <html>
 <head lang="en">
     <meta charset="utf-8"/>
-    <title>Documentation of Advanced Shipping Setting extension for Magento 2 (Replacing Owebia Shipping)</title>
+    <title>Documentation of Advanced Shipping extension for Magento 2</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/styles/github.min.css" rel="stylesheet">
     <style>
+        body{padding-top:50px;}
         h2{border-top:solid 1px #eee;padding-top:30px;margin-top:50px}
+        h3{padding-top:20px;margin-top:0}
         h4{margin-top:1.5em}
         code.hljs{display:inline;background:#eee;padding:4px;}pre code.hljs{background:none;padding:0;}
         .hljs-comment{color:gray;}.hljs-string{color:purple;}.hljs-keyword{color:blue;font-weight:bold}.hljs-variable{color:DarkBlue}.hljs-number{color:#f50}
@@ -16,9 +18,13 @@
         a[href^="#"]{color:green}a[href^="#"]:hover,a[href^="#"]:focus,a[href^="#"]:active{color:DarkGreen}
         ul.ventilated>li{padding:.5em 0;}
         /* sidebar */
-        #sidebar{position:fixed;top:0;left:0;padding-top:10px;}
-        #sidebar a{display:block;color:#716b7a;padding:5px 20px;}#sidebar a:hover,#sidebar a:focus{text-decoration:none;background-color:#e5e3e9;}
-        #sidebar .nav .nav a{padding-top:3px;padding-bottom:3px;padding-left:30px;font-size:90%;}@media screen and (max-width: 1600px){#sidebar{display:none}}
+        #sidebar{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,.5);z-index:100}
+        #sidebar > ul{padding-top:10px;padding-bottom:10px;background:#f0f0f0}
+        #sidebar ul a{display:block;color:#716b7a;padding:5px 20px;}
+        #sidebar ul a:hover,
+        #sidebar ul a:focus{text-decoration:none;background-color:#e5e3e9;}
+        #sidebar .nav .nav a{padding-top:3px;padding-bottom:3px;padding-left:30px;font-size:90%;}
+        @media screen and (min-width: 480px){#sidebar{right:auto}}
         .highlight{background:#ffa;padding:4px;line-height:2em;}
         .highlight code{background:#ffa;}
         .nav-tabs>li>a,
@@ -28,15 +34,46 @@
         .nav-tabs>li.active>a:focus,
         .nav-tabs>li.active>a:hover{background:#f5f5f5;}
         .tab-pane > pre{border-top:0;border-radius:0;border-color:#ddd}
+        .icon-bar{background-color:#888;display:block;width:22px;height:2px;border-radius:1px;}
+        .icon-bar+.icon-bar{margin-top:4px;}
+        #sidebar.opened{background:#f0f0f0;bottom:0;overflow:auto;}
+        @media screen and (min-width: 1700px){
+            #sidebar{background:#f0f0f0;bottom:0;overflow:auto;}
+            #sidebar ul.collapse{display:block;}
+            .c-hamburger{display:none!important}
+        }
+
+        .c-hamburger{display:block;position:relative;overflow:hidden;margin:0;width:50px;height:50px;font-size:0;text-indent:-9999px;border:none;appearance:none;cursor:pointer;transition:background 0.2s}
+        .navbar-inverse .navbar-toggle.c-hamburger:hover, .navbar-inverse .navbar-toggle.c-hamburger:focus{background:none}
+        .c-hamburger:focus{outline:none}
+        .c-hamburger span, .c-hamburger span::before, .c-hamburger span::after{position:absolute;display:block;height:2px;background-color:#333}
+        .c-hamburger span{top:24px;left:10px;right:10px}
+        .c-hamburger span::before, .c-hamburger span::after{left:0;width:100%;content:""}
+        .c-hamburger--htx span{transition:background 0s 0.2s}
+        .c-hamburger--htx span::before, .c-hamburger--htx span::after{transition-duration:0.2s, 0.2s}
+        .c-hamburger--htx span::before{transition-property:top, transform}
+        .c-hamburger--htx span::after{transition-property:bottom, transform}
+        .c-hamburger--htx span{background:none}
+        .c-hamburger--htx span::before{top:0;transform:rotate(45deg)}
+        .c-hamburger--htx span::after{bottom:0;transform:rotate(-45deg)}
+        .c-hamburger--htx span::before, .c-hamburger--htx span::after{transition-delay:0s, 0.2s}
+        .c-hamburger--htx.collapsed span{background:#333}
+        .c-hamburger--htx.collapsed span::before{top:-7px;transform:rotate(0)}
+        .c-hamburger--htx.collapsed span::after{bottom:-7px;transform:rotate(0)}
+        .c-hamburger--htx.collapsed span::before, .c-hamburger--htx.collapsed span::after{transition-delay:0.2s,0s}
     </style>
 </head>
 <body>
 <div id="sidebar">
     <!-- doc sidebar start -->
-    <ul class="nav sidenav">
+    <a class="c-hamburger c-hamburger--htx collapsed" role="button" title="Table of Contents" data-toggle="collapse" href="#tableOfContents" aria-expanded="false" aria-controls="tableOfContents">
+        <span>Show/Hide Table of Contents</span>
+    </a>
+    <ul id="tableOfContents" class="collapse nav sidenav">
         <li><a href="#introduction">Introduction</a></li>
         <li><a href="#addons">Add-ons</a></li>
         <li><a href="#whats_new">What's new?</a></li>
+        <li><a href="#installation">Installation</a></li>
         <li><a href="#quick_start">Quick start</a></li>
         <li><a href="#formulas">Variables and functions</a>
             <ul class="nav">
@@ -55,17 +92,26 @@
                 <li><a href="#examples_using_categories">Using categories</a></li>
             </ul>
         </li>
+        <li><a href="#hints_and_tips">Hints and tips</a>
+            <ul class="nav">
+                <li><a href="#hints_using_if_elseif_else">Using if/elseif/else statements</a></li>
+                <li><a href="#hints_access_new_customer_data">Access new customer data (ex. VAT ID)</a></li>
+                <li><a href="#hints_using_custom_customer_attribute">Using custom customer attribute</a></li>
+            </ul>
+        </li>
+
+        <li><a href="#known_issues">Known issues</a></li>
     </ul>
     <!-- doc sidebar end -->
 </div>
 
 <div class="container">
     <!-- doc content start -->
-    <h1>Documentation <small>of</small> Advanced Shipping Setting <small>extension by Owebia for Magento 2</small></h1>
+    <h1>Documentation <small>of</small> Advanced Shipping <small>extension for Magento 2 by Owebia</small></h1>
     <div id="introduction">
         <h2>Introduction</h2>
 
-        <p><strong>Advanced Shipping Setting</strong> is an extension for the e-commerce solution <a href="http://www.magentocommerce.com/" target=_blank>Magento</a>.</p>
+        <p><strong>Advanced Shipping</strong> is an extension for the e-commerce solution <a href="http://www.magentocommerce.com/" target=_blank>Magento</a>.</p>
 
         <p>The syntax using <a href="http://php.net/manual/en/" target=_blank>PHP 5.6</a> allows a great flexibility in setting delivery charges.</p>
 
@@ -79,11 +125,11 @@
         <h2>Add-ons</h2>
 
         <div class="jumbotron">
-            <h3>You want to do more with <strong>Advanced Shipping Setting</strong>?</h3>
+            <h3>You want to do more with <strong>Advanced Shipping</strong>?</h3>
             <p>Discover our add-ons on <a href="https://en.store.owebia.com/" target="_blank">Owebia Store</a>.</p>
 
             <h4><a href="https://en.store.owebia.com/magento2-module-adv-ship-unlimited-carriers-addon.html" target="_blank">Unlimited Carriers Add-on</a></h4>
-            Create as many carrier as you need with Owebia Shipping
+            Create as many carrier as you need with Advanced Shipping
 
             <h4><a href="https://en.store.owebia.com/magento2-module-adv-ship-functions-addon.html" target="_blank">Functions Add-on</a></h4>
             Use functions to simplify the writing of your configuration
@@ -97,7 +143,33 @@
     <div id="whats_new">
         <h2>What's new?</h2>
         <ul>
+            <li>
+                December, 2017 (version 2.1.0): new functions available <code>mb_strtolower</code>, <code>mb_strtoupper</code>,
+                <code>mb_substr</code>, <code>preg_replace</code>, <code>strtolower</code>, <code>strtoupper</code> and <code>time</code>
+            </li>
             <li>Get <a href="https://en.store.owebia.com/magento2-module-adv-ship-functions-addon.html" target="_blank">Functions Add-On</a> and make configuration creation easy <a href="#formulas_functions_addon" class="fn_addon">with additional functions</a></li>
+        </ul>
+    </div>
+
+    <div id="installation">
+        <h2>Installation</h2>
+        <div class="alert alert-danger">Please note that you can only install the extension using composer.</div>
+        <ul>
+            <li>Backup your store database and web directory</li>
+            <li>Open a terminal and move to Magento root directory</li>
+            <li>Run these commands in your terminal
+                <pre>
+# You must be in Magento root directory
+composer require owebia/magento2-module-advanced-shipping-setting:^2.1.0
+php bin/magento cache:clean
+php bin/magento module:enable Owebia_AdvancedSettingCore
+php bin/magento module:enable Owebia_AdvancedShippingSetting
+php bin/magento setup:upgrade
+# Execute setup:di:compile only if the store is in production mode
+php bin/magento setup:di:compile
+</pre>
+            </li>
+            <li>If you are logged to Magento backend, logout from Magento backend and login again</li>
         </ul>
     </div>
 
@@ -133,7 +205,7 @@
         </div>
         <p><a href="#examples">More examples</a></p>
         <p class="alert alert-danger">
-            <strong><u>Warning</u>:</strong> to avoid conflicts, use only the characters <code>a-z</code>, <code>A-Z</code>, <code>0-9</code>, <code>-</code> and <code>_</code> for the method id.<br/>
+            <strong><u>Warning</u>:</strong> to avoid conflicts, use only the characters <code>a-z</code>, <code>0-9</code> and <code>_</code> for the method id.<br/>
             You should also avoid identifiers that already correspond to variable names (<code>quote</code>, <code>request</code>…).
         </p>
     </div>
@@ -189,8 +261,8 @@
                                     <li><code class=php>$request->dest_country_id</code> *</li>
                                     <li><code class=php>$request->dest_region_id</code></li>
                                     <li><code class=php>$request->dest_region_code</code></li>
-                                    <li><code class=php>$request->dest_street</code></li>
-                                    <li><code class=php>$request->dest_city</code></li>
+                                    <li><code class=php>$request->dest_street</code> (<a href="#issue_inconsistent_data_with_magento_lt_2_1_8">known issue with Magento CE < 2.1.8</a>)</li>
+                                    <li><code class=php>$request->dest_city</code> (<a href="#issue_inconsistent_data_with_magento_lt_2_1_8">known issue with Magento CE < 2.1.8</a>)</li>
                                     <li><code class=php>$request->dest_postcode</code></li>
                                 </ul>
                             </li>
@@ -210,7 +282,7 @@
                             </li>
                         </ul>
                     </li>
-                    <li id="formulas_variables_quote">The <strong>quote</strong> (<code class=php>\Magento\Quote\Model\Quote</code>):
+                    <li id="formulas_variables_quote">The <strong>quote</strong> (<code class=php>\Magento\Quote\Model\Quote</code>):  (<a href="#issue_infinite_loop_when_using_quote">known issue #2</a>)
                         <ul>
                             <li><code class=php>$quote->subtotal</code>: subtotal (excluding tax)</li>
                             <li><code class=php>$quote->subtotal_with_discount</code>: subtotal (excluding tax) with discount</li>
@@ -234,6 +306,7 @@
                         <ul>
                             <li><code class=php>$customer->id</code>: alias of <code class=php>$customer->entity_id</code></li>
                             <li><code class=php>$customer->*</code>: attribute of the customer (ex: email, lastname, firstname, group_id…)</li>
+                            <li><code class=php>$customer->getCustomAttribute('my_custom_attribute')->value</code>: custom attribute of the customer (where 'my_custom_attribute' should be replaced by custom attribute's code)</li>
                         </ul>
                     </li>
                     <li id="formulas_variables_customvar">Custom <strong>variables</strong> (<code class=php>\Magento\Variable\Model\Variable</code>):
@@ -373,18 +446,25 @@
                 <li><a href="http://php.net/manual/en/function.array-unique.php" target=_blank>array_unique</a></li>
                 <li><a href="http://php.net/manual/en/function.ceil.php" target=_blank>ceil</a></li>
                 <li><a href="http://php.net/manual/en/function.count.php" target=_blank>count</a></li>
-                <li><a href="http://php.net/manual/en/function.preg-match.php" target=_blank>date</a>
+                <li><a href="http://php.net/manual/en/function.date.php" target=_blank>date</a>
                 <li><a href="http://php.net/manual/en/function.explode.php" target=_blank>explode</a></li>
                 <li><a href="http://php.net/manual/en/function.floor.php" target=_blank>floor</a></li>
                 <li><a href="http://php.net/manual/en/function.implode.php" target=_blank>implode</a></li>
                 <li><a href="http://php.net/manual/en/function.in-array.php" target=_blank>in_array</a></li>
                 <li><a href="http://php.net/manual/en/function.max.php" target=_blank>max</a></li>
+                <li><strong>(new)</strong> <a href="http://php.net/manual/en/function.mb-strtolower.php" target=_blank>mb_strtolower</a></li>
+                <li><strong>(new)</strong> <a href="http://php.net/manual/en/function.mb-strtoupper.php" target=_blank>mb_strtoupper</a></li>
+                <li><strong>(new)</strong> <a href="http://php.net/manual/en/function.mb-substr.php" target=_blank>mb_substr</a></li>
                 <li><a href="http://php.net/manual/en/function.min.php" target=_blank>min</a></li>
                 <li><a href="http://php.net/manual/en/function.preg-match.php" target=_blank>preg_match</a></li>
+                <li><strong>(new)</strong> <a href="http://php.net/manual/en/function.preg-replace.php" target=_blank>preg_replace</a></li>
                 <li><a href="http://php.net/manual/en/function.range.php" target=_blank>range</a></li>
                 <li><a href="http://php.net/manual/en/function.round.php" target=_blank>round</a></li>
+                <li><strong>(new)</strong> <a href="http://php.net/manual/en/function.strtolower.php" target=_blank>strtolower</a></li>
                 <li><a href="http://php.net/manual/en/function.strtotime.php" target=_blank>strtotime</a></li>
+                <li><strong>(new)</strong> <a href="http://php.net/manual/en/function.strtoupper.php" target=_blank>strtoupper</a></li>
                 <li><a href="http://php.net/manual/en/function.substr.php" target=_blank>substr</a></li>
+                <li><strong>(new)</strong> <a href="http://php.net/manual/en/function.time.php" target=_blank>time</a></li>
             </ul>
 
             <div id="formulas_functions_addon">
@@ -595,7 +675,7 @@
                     <div class=examples>
                         <script class=ex type="x-example">
                             /* Example */
-                            // If the package weight is lower or equal to 0.5, the price will be 5.30
+                            // If the package weight is lower or equal to 0.7, the price will be 5.30
                             // If the package weight is lower or equal to 1.0, the price will be 6.50
                             // In others cases, the price will be 7.50
                             addMethod('__auto__', [
@@ -611,7 +691,7 @@
                             ]);
                             //---
                             /* With Functions Add-on */
-                            // If the package weight is lower or equal to 0.5, the price will be 5.30
+                            // If the package weight is lower or equal to 0.7, the price will be 5.30
                             // If the package weight is lower or equal to 1.0, the price will be 6.50
                             // In others cases, the price will be 7.50
                             addMethod('__auto__', [
@@ -959,8 +1039,100 @@
                 </div>
             </div>
 
+        </div><!-- end examples_using_destination -->
+
+    </div><!-- end examples -->
+
+    <div id="hints_and_tips">
+        <h2>Hints and tips</h2>
+
+        <h3 id="hints_using_if_elseif_else">Using if/elseif/else statements</h3>
+        <div class=examples>
+            <script class=ex type="x-example">
+                /* Example */
+                if ($request->dest_country_id == 'US') {
+                    addMethod('__auto__', [
+                        'title'      => "If destination country is US",
+                        'price'      => 0,
+                    ]);
+                } elseif ($request->dest_country_id == 'CA') {
+                    addMethod('__auto__', [
+                        'title'      => "Else if destination country is CA",
+                        'price'      => 0,
+                    ]);
+                } else {
+                    addMethod('__auto__', [
+                        'title'      => "Other countries",
+                        'price'      => 10,
+                    ]);
+                }
+                //---
+                /* With Functions Add-on */
+                if (_country('US')) {
+                    addMethod('__auto__', [
+                        'title'      => "If destination country is US",
+                        'price'      => 0,
+                    ]);
+                } elseif (_country('CA')) {
+                    addMethod('__auto__', [
+                        'title'      => "Else if destination country is CA",
+                        'price'      => 0,
+                    ]);
+                } else {
+                    addMethod('__auto__', [
+                        'title'      => "Other countries",
+                        'price'      => 10,
+                    ]);
+                }
+            </script>
+        </div>
+
+        <h3 id="hints_access_new_customer_data">Access new customer data (ex. VAT ID)</h3>
+        <p><a href="#issue_inconsistent_data_with_magento_lt_2_1_8">Known issue with Magento CE < 2.1.8</a></p>
+        <div class=examples>
+            <script class=ex type="x-example">
+                /* Example */
+                if (!$customer->id && $quote->getShippingAddress()->vat_id) {
+                    addMethod('__auto__', [
+                        'title'      => "Display shipping method for new customer with VAT ID",
+                        'price'      => 0,
+                    ]);
+                }
+            </script>
+        </div>
+
+        <h3 id="hints_using_custom_customer_attribute">Using custom customer attribute</h3>
+        <p>In the following example, <code>my_custom_attribute</code> is a custom customer attribute created by a custom extension.</p>
+        <div class=examples>
+            <script class=ex type="x-example">
+                /* Example */
+                if ($customer->getCustomAttribute('my_custom_attribute')->value == 5) {
+                    addMethod('__auto__', [
+                        'title'      => "Display shipping method only for customers having 'my_custom_attribute' set to 5",
+                        'price'      => 0,
+                    ]);
+                }
+            </script>
+        </div>
+    </div>
+
+    <div id="known_issues">
+        <h2>Known issues</h2>
+
+        <ul>
+            <li id="issue_inconsistent_data_with_magento_lt_2_1_8">
+                #1: With earlier version than CE 2.1.8, Magento does not correctly update some variables:
+                <code class=php>$request->dest_street</code>, <code class=php>$request->dest_city</code> and <code class=php>$quote->getShippingAddress()->*</code>
+            </li>
+            <li id="issue_infinite_loop_when_using_quote">
+                #2: With some configurations, you can enter in an infinite loop when using <code class=php>$quote</code> variable.
+                <br/><strong>If you have more information on this issue, please contact us.</strong>
+            </li>
+        </ul>
+    </div>
+
     <!-- doc content end -->
-    <p>&copy; 2016 <a href="http://www.owebia.com/">Owebia</a></p>
+    <p style="padding-top:50px;">&copy; 2016-2017 <a href="http://www.owebia.com/">Owebia</a></p>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
@@ -1033,6 +1205,14 @@ $(function(){
         $('.nav').each(function () {
             $(this).find('> li:eq(1) > a').tab('show');
         });
+    });
+    $(document).on('click', '#sidebar ul a', function (e) {
+        $('ul', '#sidebar').removeClass('in');
+        $('a.c-hamburger', '#sidebar').addClass('collapsed');
+        $('#sidebar').removeClass('opened');
+    });
+    $(document).on('click', '#sidebar a.c-hamburger', function (e) {
+        $('#sidebar').toggleClass('opened');
     });
 });
 <!-- doc scripts end -->
